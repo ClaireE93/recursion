@@ -3,14 +3,20 @@
 
 // but you're not, so you'll write it from scratch:
 var parseJSON = function(json) {
-  // let el = json[0];
-
 
   let recurse = function(el) {
-    //String check
+    //First string check
+    // if(el === 'null' || el === '"null"') return null;
+    // if(el === 'true' || el === '"true"') return true;
+    // if(el === 'false' || el === '"false"') return false;
+    if(el === 'null') return null;
+    if(el === 'true') return true;
+    if(el === 'false') return false;
+
+    //All other string check
     if(el[0] === '"') {
       let final = '';
-      return final + json.slice(1, json.length - 1);
+      return final + el.slice(1, el.length - 1);
     }
 
     //Number check
@@ -18,51 +24,43 @@ var parseJSON = function(json) {
       return parseInt(el, 10);
     }
 
-    //Other check
-    if(el === 'null') return null;
-    if(el === 'true') return true;
-    if(el === 'false') return false;
+
 
     //Object function
     if(el[0] === '{') {
-      // let isEnd = false;
       return parseObj(el);
     }
 
     //Array function
     if(el[0] === '[') {
-      // let arr = [];
       return parseArr(el);
     }
 
   }
 
-  //Call function to kick off
-  recurse(json);
-
   let parseObj = el => {
 
     let obj = {};
+    if(el[1] === '}') return obj;
     let keys = getKeysArr(el);
     keys.forEach(cur => {
       let curKey = getStrObj(cur, 'key');
       let curVal = getStrObj(cur, 'val');
-      obj[curKey] = recurse(curVal);
-    })
+      obj[curKey] = recurse(removeWhitespace(curVal));
+    });
     return obj;
   };
 
   let parseArr = el => {
     let arr = [];
-    let arrEl = getString(el, 'array');
+    if(el[1] === ']') return arr;
+    let arrEl = getKeysArr(el);
+    arrEl.forEach(cur => {
+      arr.push(recurse(removeWhitespace(cur)));
+    });
 
     return arr;
   };
-
-  let getString = (el, type) => {
-    let finalStr = '';
-
-  }
 
   let getStrObj = (cur, type) => {
     let str = '';
@@ -100,7 +98,7 @@ var parseJSON = function(json) {
         continue;
       }
 
-      if(el[i] === '}' && i === el.length - 1) {
+      if((el[i] === '}' || el[i] === ']') && i === el.length - 1) {
       arr.push(str);
         str = '';
         continue;
@@ -109,9 +107,32 @@ var parseJSON = function(json) {
       str += el[i];
     }
     return arr;
+  };
+
+  let removeWhitespace = el => {
+    let start = 0;
+    let end = el.length - 1;
+    while(el[start] === ' ') {
+      start++;
+    }
+    while(el[end] === ' ') {
+      end--;
+    }
+    return el.slice(start, end + 1);
   }
 
+
+  //Call function to kick off
+  return recurse(json);
+
 };
+
+// parseJSON('{}');              // {}
+// JSON.parse('true');            // true
+// JSON.parse('"foo"');           // "foo"
+// JSON.parse('[1, 5, "false"]'); // [1, 5, "false"]
+// JSON.parse('null');            // null
+
 
 
 //Create recursive function for every type of JSON grammar (object, string, array, etc)
