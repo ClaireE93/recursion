@@ -24,16 +24,31 @@ var parseJSON = function(json) {
 
     //Object function
     if(el[0] === '{') {
-      let obj = {};
+      // let obj = {};
       return parseObj(el);
     }
 
     //Array function
     if(el[0] === '[') {
-      let arr = [];
+      // let arr = [];
       return parseArr(el);
     }
 
+  }
+
+  let parseObj = el => {
+    let obj = {};
+    let objEl = getString(el, 'object');
+  };
+
+  let parseArr = el => {
+    let arr = [];
+    let arrEl = getString(el, 'array');
+  };
+
+  let getString = (el, type) => {
+    let finalStr = '';
+    
   }
 
 
