@@ -6,6 +6,9 @@
 var stringifyJSON = function(obj) {
   let final = '';
   let arrElements = [];
+  let objKeys = [];
+  let objElem = [];
+  let arrObj = [];
   if(typeof obj === 'number' || typeof obj ==='boolean' || typeof obj === null) {
     return final += obj;
   }
@@ -13,8 +16,17 @@ var stringifyJSON = function(obj) {
   if(Array.isArray(obj)) {
     // final += '[';
     // return final + obj.reduce((acc, cur) => {
-    
-
-
+    for(let i = 0; i < obj.length; i++) {
+      arrElements.push(stringifyJSON(obj[i]));
     }
-  };
+    return '[' + arrElements.join(',') + ']';
+    }
+  if (typeof obj === 'object') {
+    // let keys = Object.keys(obj);
+    for(keys in obj) {
+      arrObj.push(`${keys}: ${stringifyJSON(obj[keys])}`)
+    return '{' + arrObj.join(',') + '}'
+    }
+  }
+
+};
