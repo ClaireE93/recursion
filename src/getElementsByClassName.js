@@ -8,10 +8,8 @@
 var getElementsByClassName = function(className) {
     let final = [];
 
-    if (document.body.className === className) final.push(document.body);
     let nodes = document.body.childNodes;
     let recurse = (element) => {
-        //console.log(element);
         if (element === undefined) return;
         if (element.classList === undefined) {
 
@@ -26,10 +24,7 @@ var getElementsByClassName = function(className) {
 
     };
 
-    for (let i = 0; i < nodes.length; i++) {
-        //console.log('Going into: ' + nodes[i]);
-        recurse(nodes[i]);
-    }
+    recurse(document.body);
 
     return final;
 
