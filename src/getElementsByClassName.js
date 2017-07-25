@@ -6,26 +6,22 @@
 // But instead we're going to implement it from scratch:
 
 var getElementsByClassName = function(className) {
-    let final = [];
+  let final = [];
 
-    let nodes = document.body.childNodes;
-    let recurse = (element) => {
-        if (element === undefined) return;
-        if (element.classList === undefined) {
+  let recurse = (element) => {
+    if (element === undefined) return;
+    if (element.classList !== undefined && element.classList.contains(className)) {
+      final.push(element);
+    }
+    if (element.childNodes.length) {
+      for(let node of element.childNodes) {
+        recurse(node);
+      }
+    }
+  };
 
-        } else if (element.classList.contains(className)) {
-            final.push(element);
-        }
-        if (element.childNodes.length > 0) {
-            for (let i = 0; i < element.childNodes.length; i++) {
-                recurse(element.childNodes[i]);
-            }
-        }
+  recurse(document.body);
 
-    };
-
-    recurse(document.body);
-
-    return final;
+  return final;
 
 };
