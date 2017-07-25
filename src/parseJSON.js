@@ -5,6 +5,7 @@
 var parseJSON = function(json) {
   // let el = json[0];
 
+
   let recurse = function(el) {
     //String check
     if(el[0] === '"') {
@@ -24,7 +25,7 @@ var parseJSON = function(json) {
 
     //Object function
     if(el[0] === '{') {
-      // let obj = {};
+      // let isEnd = false;
       return parseObj(el);
     }
 
@@ -36,23 +37,79 @@ var parseJSON = function(json) {
 
   }
 
+  //Call function to kick off
+  recurse(json);
+
   let parseObj = el => {
+
     let obj = {};
-    let objEl = getString(el, 'object');
+    let keys = getKeysArr(el);
+    keys.forEach(cur => {
+      let curKey = getStrObj(cur, 'key');
+      let curVal = getStrObj(cur, 'val');
+      obj[curKey] = recurse(curVal);
+    })
+    return obj;
   };
 
   let parseArr = el => {
     let arr = [];
     let arrEl = getString(el, 'array');
+
+    return arr;
   };
 
   let getString = (el, type) => {
     let finalStr = '';
-    
+
   }
 
+  let getStrObj = (cur, type) => {
+    let str = '';
+    let i = 0;
+    if (type === 'key') {
+      while(cur[i] != ':') {
+        str += cur[i];
+        i++;
+      }
+    }
 
+    if (type === 'val') {
+      while(cur[i] != ':') {
+        i++;
+      }
+      i++;
+      str = cur.slice(i, cur.length);
+    }
 
+    return str;
+  }
+
+  let getKeysArr = el => {
+    let arr = [];
+    let isInside = false;
+    let str = '';
+    for(let i = 1; i < el.length; i++) {
+
+      if(el[i] === '[' || el[i] === '{') isInside = true;
+      if(el[i] === ']' || el[i] === '}') isInside = false;
+
+      if(el[i] === ',' && !isInside) {
+        arr.push(str);
+        str = '';
+        continue;
+      }
+
+      if(el[i] === '}' && i === el.length - 1) {
+      arr.push(str);
+        str = '';
+        continue;
+      }
+
+      str += el[i];
+    }
+    return arr;
+  }
 
 };
 
