@@ -50,13 +50,13 @@ var parseJSON = function(json) {
   let parseObj = el => {
     let obj = {};
     if(el[1] === '}') return obj;
-    let keys = getKeysArr(el);
-    // console.log(keys);
-    keys.forEach(cur => {
-      let curKey = getStrObj(cur, 'key');
+    let keyValuePairs = getKeyValuePairsArr(el);
+    console.log(keyValuePairs);
+    keyValuePairs.forEach(curPair => {
+      let curKey = getKeyValueStrings(curPair, 'key');
       curKey = removeWhitespace(curKey);
       curKey = curKey.slice(1, curKey.length - 1);
-      let curVal = getStrObj(cur, 'val');
+      let curVal = getKeyValueStrings(curPair, 'val');
       obj[curKey] = recurse(removeWhitespace(curVal));
     });
     return obj;
@@ -65,7 +65,7 @@ var parseJSON = function(json) {
   let parseArr = el => {
     let arr = [];
     if(el[1] === ']') return arr;
-    let arrEl = getKeysArr(el);
+    let arrEl = getKeyValuePairsArr(el);
     arrEl.forEach(cur => {
       arr.push(recurse(removeWhitespace(cur)));
     });
@@ -73,7 +73,8 @@ var parseJSON = function(json) {
     return arr;
   };
 
-  let getStrObj = (cur, type) => {
+  // split into getKeyString and getValueString
+  let getKeyValueStrings = (cur, type) => {
     let str = '';
     let i = 0;
     if (type === 'key') {
@@ -94,25 +95,63 @@ var parseJSON = function(json) {
     return str;
   };
 
-  let getKeysArr = el => {
+  let getKeyValuePairsArr = el => {
     let arr = [];
-    let isInside = false;
+    // let isInside = false;
+    let isInString = false;
     let str = '';
-    let enclosed = 0;
+    let depth = 0;
+    console.log('Starting string is', el );
     for(let i = 1; i < el.length; i++) {
-      if(el[i] === '[' || el[i] === '{' || (el[i] === '"' && !isInside)) {
-        isInside = true;
-        enclosed++;
-      } else if (el[i] === ']' || el[i] === '}' ||(el[i] === '"' && isInside)) {
-        isInside = false;
-        enclosed--;
+      // TODO: try triple quote case. Detect when in string
+      //While within a string, ignore every {} or []
+      if (depth === -1) {
+        arr.push(str);
+        break;
       }
 
-      if(el[i] === ',' && enclosed === 0) {
+      if (isInString) {
+        if (el[i] === '\"' && el[i-1] !== '\\') {
+          isInString = false;
+        }
+        str += el[i];
+        continue;
+      }
+
+      if (el[i] === '[' || el[i] === '{') {
+        depth++;
+      } else if ( (el[i] === ']' || el[i] === '}') && (i === el.length - 1) ) {
         arr.push(str);
         str = '';
         continue;
+      } else if (el[i] === ']' || el[i] === '}') {
+        depth--;
+      } else if (el[i] === '\"') {
+        isInString = true;
+      } else if (el[i] === ',' && depth === 0) {
+        arr.push(str);
+        str = '';
+        continue;
+      } else if ((el[i] === '\n' || el[i] === '\r' || el[i] === '\t')) {
+        continue;
       }
+
+      str += el[i];
+
+      // if(el[i] === '[' || el[i] === '{' || (el[i] === '\"' && !isInside)) {
+      //   isInside = true;
+      //   depth++;
+      // } else if (el[i] === ']' || el[i] === '}' || (el[i] === '\"' && isInside)) {
+      //   isInside = false;
+      //   depth--;
+      // }
+
+      // claire
+      // if(el[i] === ',' && depth === 0) {
+      //   arr.push(str);
+      //   str = '';
+      //   continue;
+      // }
 
       // if((el[i] === '}' || el[i] === ']') && i === el.length - 1) {
       //   // console.log(str);
@@ -120,17 +159,26 @@ var parseJSON = function(json) {
       //   str = '';
       //   continue;
       // }
-      if((el[i] === '}' || el[i] === ']') && (enclosed === -1 || i === el.length - 1)) {
-        // console.log(str);
-        arr.push(str);
-        str = '';
-        continue;
-      }
+      // claire
+      // if((el[i] === '}' || el[i] === ']') && (depth === -1 || i === el.length - 1)) {
+      //   // console.log(str);
+      //   arr.push(str);
+      //   str = '';
+      //   continue;
+      // }
+      // if((el[i] === '}' || el[i] === ']') && depth === -1) {
+      //   // console.log(str);
+      //   // str += el[i];
+      //   arr.push(str);
+      //   str = '';
+      //   continue;
+      // }
 
-      str += el[i];
     }
-    // console.log(str);
-    // console.log(enclosed);
+    // console.log("String is", str);
+    // console.log(isInString);
+    // console.log(i === el.length - 1);
+    console.log('depth: ', depth);
     return arr;
   };
 
