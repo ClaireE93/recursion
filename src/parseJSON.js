@@ -20,11 +20,15 @@ var parseJSON = function(json) {
     }
 
     //Number check
-    if(/^[0-9]+$/.test(el)) {
-      return parseInt(el, 10);
+    // if(/^-?[0-9]+$/.test(el)) {
+    //   return parseInt(el, 10);
+    // }
+    // let isNeg = (el[0] === '-' && /^[0-9]+$/.test(el[1]))
+    // let isNum = /^-?[0-9]+$/.test(el[0]);
+    // let isDec = /^[0-9]+$/.test(el[1])
+    if(isNum(el)) {
+      return parseFloat(el);
     }
-
-
 
     //Object function
     if(el[0] === '{') {
@@ -38,6 +42,12 @@ var parseJSON = function(json) {
 
   }
 
+  let isNum = el => {
+      let ArrTest = el[0] === '[' || el[0] === '{';
+      let test = /^[0-9]+$/.test(el[1]) || /^-?[0-9]+$/.test(el[0]);;
+      return test && !ArrTest;
+    };
+
   let parseObj = el => {
 
     let obj = {};
@@ -45,6 +55,8 @@ var parseJSON = function(json) {
     let keys = getKeysArr(el);
     keys.forEach(cur => {
       let curKey = getStrObj(cur, 'key');
+      curKey = removeWhitespace(curKey);
+      curKey = curKey.slice(1, curKey.length - 1);
       let curVal = getStrObj(cur, 'val');
       obj[curKey] = recurse(removeWhitespace(curVal));
     });
