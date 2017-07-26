@@ -9,7 +9,7 @@ var parseJSON = function(json) {
     if (el === 'true') return true;
     if (el === 'false') return false;
 
-    //All other string check
+    //All other string check. Slice of extra quotation marks and ignore escape characters.
     if (el[0] === '\"') {
       let final = '';
       for (let i = 1; i < el.length - 1; i++) {
@@ -23,11 +23,6 @@ var parseJSON = function(json) {
       return final;
     }
 
-    //Number check
-    if (isNum(el)) {
-      return parseFloat(el);
-    }
-
     //Object function
     if (el[0] === '{') {
       return parseObj(el);
@@ -38,15 +33,18 @@ var parseJSON = function(json) {
       return parseArr(el);
     }
 
+    //Number check
+    if (isNum(el)) {
+      return parseFloat(el);
+    }
+
   };
 
-  //Check for negatives, floats, and ints. Check that element is primitive value,
-  //not a value in an array/object.
+  //Check for negatives, floats, and ints.
   let isNum = el => {
-    let isArr = el[0] === '[' || el[0] === '{';
     let test = /^[0-9]+$/.test(el[0]) || /^[0-9]+$/.test(el[1]);
 
-    return test && !isArr;
+    return test;
   };
 
   let parseObj = el => {
@@ -54,12 +52,12 @@ var parseJSON = function(json) {
     if (el[1] === '}') return obj;
     let keyValuePairs = getKeyValuePairsArr(el);
     keyValuePairs.forEach(curPair => {
-      let curKey = getKeyString(curPair).trim();
+      let curKey = getKeyValString(curPair).trim();
       curKey = curKey.slice(1, curKey.length - 1); //Slice off unecessary quotation marks.
-      let curVal = getValueString(curPair);
-      obj[curKey] = recurse(curVal.trim());
+      let curVal = getKeyValString(curPair, true).trim();
+      obj[curKey] = recurse(curVal);
     });
-    
+
     return obj;
   };
 
@@ -74,31 +72,19 @@ var parseJSON = function(json) {
     return arr;
   };
 
-  //Get split key and value strings from getKeyValuePairsArr elements.
-  let getKeyString = el => {
+  //Get split key and value strings from getKeyValuePairsArr elements using ':' as split point
+  let getKeyValString = (el, isVal) => {
     let str = '';
     let i = 0;
     while (el[i] != ':') {
       str += el[i];
       i++;
     }
-
-    return str;
-  };
-
-  let getValueString = el => {
-    let str = '';
-    let i = 0;
-    while (el[i] != ':') {
-      i++;
+    if (isVal) {
+      return el.slice(++i, el.length);
     }
-    i++;
-    str = el.slice(i, el.length);
-
     return str;
   };
-
-
 
   let getKeyValuePairsArr = el => {
     let arr = [];
@@ -133,7 +119,7 @@ var parseJSON = function(json) {
         depth--;
       } else if (el[i] === '\"') {
         isInString = true;
-      } else if (el[i] === ',' && depth === 0) {
+      } else if (el[i] === ',' && depth === 0) {  //Reached end of key/val pair or arr element.
         arr.push(str);
         str = '';
         continue;
