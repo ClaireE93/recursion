@@ -12,17 +12,16 @@ var parseJSON = function(json) {
 
     //All other string check
     if(el[0] === '"') {
-      return strHandler(el);
-      // let final = '';
-      // for(let i = 1; i < el.length - 1; i++) {
-      //   if(el[i] === '\\') {
-      //     final += el[i+1];
-      //     i++;
-      //   } else {
-      //     final += el[i];
-      //   }
-      // }
-      // return final;
+      let final = '';
+      for(let i = 1; i < el.length - 1; i++) {
+        if(el[i] === '\\') {
+          final += el[i+1];
+          i++;
+        } else {
+          final += el[i];
+        }
+      }
+      return final;
     }
 
     //Number check
@@ -48,37 +47,18 @@ var parseJSON = function(json) {
       return test && !ArrTest;
     };
 
-  let strHandler = el => {
-    // el = removeWhitespace(el);
-    console.log(el);
-    let final = '';
-    for(let i = 1; i < el.length - 1; i++) {
-      if(el[i] === '\\') {
-        final += el[i+1];
-        i++;
-      } else {
-        final += el[i];
-      }
-    }
-    // console.log('str handler: ' + final);
-
-    // return removeWhitespace(final);
-    return final;
-  }
-
   let parseObj = el => {
 
     let obj = {};
     if(el[1] === '}') return obj;
     let keys = getKeysArr(el);
-    console.log(keys);
+    // console.log(keys);
     keys.forEach(cur => {
       let curKey = getStrObj(cur, 'key');
-      curKey = strHandler(curKey);
+      curKey = removeWhitespace(curKey);
       curKey = curKey.slice(1, curKey.length - 1);
       let curVal = getStrObj(cur, 'val');
-      console.log('val str: ' + strHandler(curVal));
-      obj[curKey] = recurse(strHandler(curVal));
+      obj[curKey] = recurse(removeWhitespace(curVal));
     });
     return obj;
   };
@@ -141,11 +121,6 @@ var parseJSON = function(json) {
         continue;
       }
 
-      // if((el[i] === '\\')) {
-      //   i++;
-      //   continue;
-      // }
-
       str += el[i];
     }
     return arr;
@@ -160,7 +135,6 @@ var parseJSON = function(json) {
     while(el[end] === ' ') {
       end--;
     }
-
     return el.slice(start, end + 1);
   };
 
