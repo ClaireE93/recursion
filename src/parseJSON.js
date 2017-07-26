@@ -51,7 +51,7 @@ var parseJSON = function(json) {
     let obj = {};
     if(el[1] === '}') return obj;
     let keyValuePairs = getKeyValuePairsArr(el);
-    console.log(keyValuePairs);
+    // console.log(keyValuePairs);
     keyValuePairs.forEach(curPair => {
       let curKey = getKeyValueStrings(curPair, 'key');
       curKey = removeWhitespace(curKey);
@@ -97,15 +97,13 @@ var parseJSON = function(json) {
 
   let getKeyValuePairsArr = el => {
     let arr = [];
-    // let isInside = false;
     let isInString = false;
     let str = '';
     let depth = 0;
-    console.log('Starting string is', el );
     for(let i = 1; i < el.length; i++) {
-      // TODO: try triple quote case. Detect when in string
-      //While within a string, ignore every {} or []
+
       if (depth === -1) {
+        str = str.slice(0, str.length - 1);
         arr.push(str);
         break;
       }
@@ -178,7 +176,12 @@ var parseJSON = function(json) {
     // console.log("String is", str);
     // console.log(isInString);
     // console.log(i === el.length - 1);
-    console.log('depth: ', depth);
+    // console.log('depth: ', depth);
+    //Throw error if JSON syntax is wrong
+    if(depth === 0 && str.length > 0) {
+      throw new SyntaxError();
+    }
+
     return arr;
   };
 
