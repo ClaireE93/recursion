@@ -101,8 +101,11 @@ var parseJSON = function(json) {
     let str = '';
     for(let i = 1; i < el.length; i++) {
 
-      if(el[i] === '[' || el[i] === '{') isInside = true;
-      if(el[i] === ']' || el[i] === '}') isInside = false;
+      if(el[i] === '[' || el[i] === '{' || (el[i] === '"' && !isInside)) {
+        isInside = true;
+      } else if (el[i] === ']' || el[i] === '}' ||(el[i] === '"' && isInside)) {
+        isInside = false;
+      }
 
       if(el[i] === ',' && !isInside) {
         arr.push(str);
