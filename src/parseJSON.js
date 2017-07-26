@@ -9,17 +9,21 @@ var parseJSON = function(json) {
     if(el === 'null') return null;
     if(el === 'true') return true;
     if(el === 'false') return false;
+    // if(el === '""') return "";
 
     //All other string check
     if(el[0] === '"') {
       let final = '';
+      el = removeWhitespace(el);
+      // console.log('whitespace gone: ' + el)
       for(let i = 1; i < el.length - 1; i++) {
-        if(el[i] === '\\') {
-          final += el[i+1];
-          i++;
-        } else {
-          final += el[i];
-        }
+        // if(el[i] === '\\') {
+        //   final += el[i+1];
+        //   i++;
+        // } else {
+        //   final += el[i];
+        // }
+        final += el[i];
       }
       return final;
     }
@@ -55,10 +59,14 @@ var parseJSON = function(json) {
     // console.log(keys);
     keys.forEach(cur => {
       let curKey = getStrObj(cur, 'key');
-      curKey = removeWhitespace(curKey);
+      // curKey = removeWhitespace(curKey);
       curKey = curKey.slice(1, curKey.length - 1);
       let curVal = getStrObj(cur, 'val');
+      // console.log(curVal);
+      // console.log(removeWhitespace(curVal));
       obj[curKey] = recurse(removeWhitespace(curVal));
+      // obj[curKey] = recurse(curVal);
+
     });
     return obj;
   };
@@ -68,7 +76,9 @@ var parseJSON = function(json) {
     if(el[1] === ']') return arr;
     let arrEl = getKeysArr(el);
     arrEl.forEach(cur => {
-      arr.push(recurse(removeWhitespace(cur)));
+      // arr.push(recurse(removeWhitespace(cur)));
+      arr.push(recurse(cur));
+
     });
 
     return arr;
@@ -129,13 +139,26 @@ var parseJSON = function(json) {
   let removeWhitespace = el => {
     let start = 0;
     let end = el.length - 1;
+    let final = '';
     while(el[start] === ' ') {
       start++;
     }
     while(el[end] === ' ') {
       end--;
     }
-    return el.slice(start, end + 1);
+    el = el.slice(start, end + 1);
+    // console.log(el);
+    for(let i = 0; i < el.length; i++) {
+      if(el[i] === '\\') {
+        final += el[i+1];
+        i++;
+      } else {
+        final += el[i];
+      }
+    }
+
+    return final;
+    // return el.slice(start, end + 1);
   };
 
   //Call function to kick off
