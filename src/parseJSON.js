@@ -39,11 +39,13 @@ var parseJSON = function(json) {
       return parseArr(el);
     }
 
-  }
+  };
 
+  //Check for negatives, floats, and ints. Check that element is primitive value,
+  //not a value in an array/object.
   let isNum = el => {
       let isArr = el[0] === '[' || el[0] === '{';
-      let test = /^[0-9]+$/.test(el[1]) || /^-?[0-9]+$/.test(el[0]);;
+      let test = /^[0-9]+$/.test(el[0]) || /^[0-9]+$/.test(el[1]);
       return test && !isArr;
     };
 
@@ -51,13 +53,11 @@ var parseJSON = function(json) {
     let obj = {};
     if(el[1] === '}') return obj;
     let keyValuePairs = getKeyValuePairsArr(el);
-    // console.log(keyValuePairs);
     keyValuePairs.forEach(curPair => {
-      let curKey = getKeyValueStrings(curPair, 'key');
-      curKey = removeWhitespace(curKey);
-      curKey = curKey.slice(1, curKey.length - 1);
-      let curVal = getKeyValueStrings(curPair, 'val');
-      obj[curKey] = recurse(removeWhitespace(curVal));
+      let curKey = getKeyString(curPair).trim();
+      curKey = curKey.slice(1, curKey.length - 1);          //Slice off unecessary quotation marks.
+      let curVal = getValueString(curPair);
+      obj[curKey] = recurse(curVal.trim());
     });
     return obj;
   };
@@ -67,33 +67,37 @@ var parseJSON = function(json) {
     if(el[1] === ']') return arr;
     let arrEl = getKeyValuePairsArr(el);
     arrEl.forEach(cur => {
-      arr.push(recurse(removeWhitespace(cur)));
+      arr.push(recurse(cur.trim()));
     });
 
     return arr;
   };
 
-  // split into getKeyString and getValueString
-  let getKeyValueStrings = (cur, type) => {
+  //Get split key and value strings from getKeyValuePairsArr elements.
+  let getKeyString = el => {
     let str = '';
     let i = 0;
-    if (type === 'key') {
-      while(cur[i] != ':') {
-        str += cur[i];
-        i++;
-      }
-    }
-
-    if (type === 'val') {
-      while(cur[i] != ':') {
-        i++;
-      }
+    while(el[i] != ':') {
+      str += el[i];
       i++;
-      str = cur.slice(i, cur.length);
     }
 
     return str;
   };
+
+  let getValueString = el => {
+    let str = '';
+    let i = 0;
+    while(el[i] != ':') {
+      i++;
+    }
+    i++;
+    str = el.slice(i, el.length);
+
+    return str;
+  };
+
+
 
   let getKeyValuePairsArr = el => {
     let arr = [];
@@ -102,6 +106,8 @@ var parseJSON = function(json) {
     let depth = 0;
     for(let i = 1; i < el.length; i++) {
 
+      //el.length check will fail if obj has extra whitespace. This catches the end of the object
+      //and cuts off the extra bracket/curly brace that got added when el.length check failed.
       if (depth === -1) {
         str = str.slice(0, str.length - 1);
         arr.push(str);
@@ -118,10 +124,10 @@ var parseJSON = function(json) {
 
       if (el[i] === '[' || el[i] === '{') {
         depth++;
-      } else if ( (el[i] === ']' || el[i] === '}') && (i === el.length - 1) ) {
+      } else if ( (el[i] === ']' || el[i] === '}') && (i === el.length - 1) ) { //Reached end of string
         arr.push(str);
         str = '';
-        continue;
+        break;
       } else if (el[i] === ']' || el[i] === '}') {
         depth--;
       } else if (el[i] === '\"') {
@@ -136,65 +142,14 @@ var parseJSON = function(json) {
 
       str += el[i];
 
-      // if(el[i] === '[' || el[i] === '{' || (el[i] === '\"' && !isInside)) {
-      //   isInside = true;
-      //   depth++;
-      // } else if (el[i] === ']' || el[i] === '}' || (el[i] === '\"' && isInside)) {
-      //   isInside = false;
-      //   depth--;
-      // }
-
-      // claire
-      // if(el[i] === ',' && depth === 0) {
-      //   arr.push(str);
-      //   str = '';
-      //   continue;
-      // }
-
-      // if((el[i] === '}' || el[i] === ']') && i === el.length - 1) {
-      //   // console.log(str);
-      //   arr.push(str);
-      //   str = '';
-      //   continue;
-      // }
-      // claire
-      // if((el[i] === '}' || el[i] === ']') && (depth === -1 || i === el.length - 1)) {
-      //   // console.log(str);
-      //   arr.push(str);
-      //   str = '';
-      //   continue;
-      // }
-      // if((el[i] === '}' || el[i] === ']') && depth === -1) {
-      //   // console.log(str);
-      //   // str += el[i];
-      //   arr.push(str);
-      //   str = '';
-      //   continue;
-      // }
-
     }
-    // console.log("String is", str);
-    // console.log(isInString);
-    // console.log(i === el.length - 1);
-    // console.log('depth: ', depth);
+
     //Throw error if JSON syntax is wrong
     if(depth === 0 && str.length > 0) {
       throw new SyntaxError();
     }
 
     return arr;
-  };
-
-  let removeWhitespace = el => {
-    let start = 0;
-    let end = el.length - 1;
-    while(el[start] === ' ') {
-      start++;
-    }
-    while(el[end] === ' ') {
-      end--;
-    }
-    return el.slice(start, end + 1);
   };
 
   //Call function to kick off
