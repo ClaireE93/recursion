@@ -6,9 +6,6 @@ var parseJSON = function(json) {
 
   let recurse = function(el) {
     //First string check
-    // if(el === 'null' || el === '"null"') return null;
-    // if(el === 'true' || el === '"true"') return true;
-    // if(el === 'false' || el === '"false"') return false;
     if(el === 'null') return null;
     if(el === 'true') return true;
     if(el === 'false') return false;
@@ -16,16 +13,18 @@ var parseJSON = function(json) {
     //All other string check
     if(el[0] === '"') {
       let final = '';
-      return final + el.slice(1, el.length - 1);
+      for(let i = 1; i < el.length - 1; i++) {
+        if(el[i] === '\\') {
+          final += el[i+1];
+          i++;
+        } else {
+          final += el[i];
+        }
+      }
+      return final;
     }
 
     //Number check
-    // if(/^-?[0-9]+$/.test(el)) {
-    //   return parseInt(el, 10);
-    // }
-    // let isNeg = (el[0] === '-' && /^[0-9]+$/.test(el[1]))
-    // let isNum = /^-?[0-9]+$/.test(el[0]);
-    // let isDec = /^[0-9]+$/.test(el[1])
     if(isNum(el)) {
       return parseFloat(el);
     }
@@ -53,6 +52,7 @@ var parseJSON = function(json) {
     let obj = {};
     if(el[1] === '}') return obj;
     let keys = getKeysArr(el);
+    // console.log(keys);
     keys.forEach(cur => {
       let curKey = getStrObj(cur, 'key');
       curKey = removeWhitespace(curKey);
@@ -93,21 +93,23 @@ var parseJSON = function(json) {
     }
 
     return str;
-  }
+  };
 
   let getKeysArr = el => {
     let arr = [];
     let isInside = false;
     let str = '';
+    let enclosed = 0;
     for(let i = 1; i < el.length; i++) {
-
       if(el[i] === '[' || el[i] === '{' || (el[i] === '"' && !isInside)) {
         isInside = true;
+        enclosed++;
       } else if (el[i] === ']' || el[i] === '}' ||(el[i] === '"' && isInside)) {
         isInside = false;
+        enclosed--;
       }
 
-      if(el[i] === ',' && !isInside) {
+      if(el[i] === ',' && enclosed === 0) {
         arr.push(str);
         str = '';
         continue;
@@ -134,22 +136,9 @@ var parseJSON = function(json) {
       end--;
     }
     return el.slice(start, end + 1);
-  }
-
+  };
 
   //Call function to kick off
   return recurse(json);
 
 };
-
-// parseJSON('{}');              // {}
-// JSON.parse('true');            // true
-// JSON.parse('"foo"');           // "foo"
-// JSON.parse('[1, 5, "false"]'); // [1, 5, "false"]
-// JSON.parse('null');            // null
-
-
-
-//Create recursive function for every type of JSON grammar (object, string, array, etc)
-//Create nextChar function that gets the next character to be parsed and ignores unecessary whitespace.
-//Go into recursive function for overall object and then call other functions as needed for object elements.
