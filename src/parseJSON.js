@@ -11,7 +11,7 @@ var parseJSON = function(json) {
     if(el === 'false') return false;
 
     //All other string check
-    if(el[0] === '"') {
+    if(el[0] === '\"') {
       let final = '';
       for(let i = 1; i < el.length - 1; i++) {
         if(el[i] === '\\') {
@@ -42,13 +42,12 @@ var parseJSON = function(json) {
   }
 
   let isNum = el => {
-      let ArrTest = el[0] === '[' || el[0] === '{';
+      let isArr = el[0] === '[' || el[0] === '{';
       let test = /^[0-9]+$/.test(el[1]) || /^-?[0-9]+$/.test(el[0]);;
-      return test && !ArrTest;
+      return test && !isArr;
     };
 
   let parseObj = el => {
-
     let obj = {};
     if(el[1] === '}') return obj;
     let keys = getKeysArr(el);
@@ -115,14 +114,23 @@ var parseJSON = function(json) {
         continue;
       }
 
-      if((el[i] === '}' || el[i] === ']') && i === el.length - 1) {
-      arr.push(str);
+      // if((el[i] === '}' || el[i] === ']') && i === el.length - 1) {
+      //   // console.log(str);
+      //   arr.push(str);
+      //   str = '';
+      //   continue;
+      // }
+      if((el[i] === '}' || el[i] === ']') && (enclosed === -1 || i === el.length - 1)) {
+        // console.log(str);
+        arr.push(str);
         str = '';
         continue;
       }
 
       str += el[i];
     }
+    // console.log(str);
+    // console.log(enclosed);
     return arr;
   };
 
