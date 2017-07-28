@@ -41,17 +41,17 @@ var parseJSON = function(json) {
   };
 
   //Check for negatives, floats, and ints.
-  let isNum = el => {
+  let isNum = (el) => {
     let test = /^[0-9]+$/.test(el[0]) || /^[0-9]+$/.test(el[1]);
 
     return test;
   };
 
-  let parseObj = el => {
+  let parseObj = (el) => {
     let obj = {};
     if (el[1] === '}') return obj;
     let keyValuePairs = getKeyValuePairsArr(el);
-    keyValuePairs.forEach(curPair => {
+    keyValuePairs.forEach((curPair) => {
       let curKey = getKeyValString(curPair).trim();
       curKey = curKey.slice(1, curKey.length - 1); //Slice off unecessary quotation marks.
       let curVal = getKeyValString(curPair, true).trim();
@@ -61,11 +61,11 @@ var parseJSON = function(json) {
     return obj;
   };
 
-  let parseArr = el => {
+  let parseArr = (el) => {
     let arr = [];
     if (el[1] === ']') return arr;
     let arrEl = getKeyValuePairsArr(el);
-    arrEl.forEach(cur => {
+    arrEl.forEach((cur) => {
       arr.push(recurse(cur.trim()));
     });
 
@@ -86,7 +86,7 @@ var parseJSON = function(json) {
     return str;
   };
 
-  let getKeyValuePairsArr = el => {
+  let getKeyValuePairsArr = (el) => {
     let arr = [];
     let isInString = false;
     let str = '';
