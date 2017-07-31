@@ -3,7 +3,7 @@
 // but you're not, so you'll write it from scratch:
 var parseJSON = function(json) {
 
-  let recurse = function(el) {
+  const recurse = function recurseElementToParse(el) {
     //First string check
     if (el === 'null') return null;
     if (el === 'true') return true;
@@ -41,16 +41,16 @@ var parseJSON = function(json) {
   };
 
   //Check for negatives, floats, and ints.
-  let isNum = (el) => {
+  const isNum = function checkIfElIsNumber(el) {
     let test = /^[0-9]+$/.test(el[0]) || /^[0-9]+$/.test(el[1]);
 
     return test;
   };
 
-  let parseObj = (el) => {
+  const parseObj = function parseObjUsingRecursion(el) {
     let obj = {};
     if (el[1] === '}') return obj;
-    let keyValuePairs = getKeyValuePairsArr(el);
+    let keyValuePairs = getKeyValuePairs(el);
     keyValuePairs.forEach((curPair) => {
       let curKey = getKeyValString(curPair).trim();
       curKey = curKey.slice(1, curKey.length - 1); //Slice off unecessary quotation marks.
@@ -61,10 +61,10 @@ var parseJSON = function(json) {
     return obj;
   };
 
-  let parseArr = (el) => {
+  const parseArr = function parseArrUsingRecursion(el) {
     let arr = [];
     if (el[1] === ']') return arr;
-    let arrEl = getKeyValuePairsArr(el);
+    let arrEl = getKeyValuePairs(el);
     arrEl.forEach((cur) => {
       arr.push(recurse(cur.trim()));
     });
@@ -72,8 +72,8 @@ var parseJSON = function(json) {
     return arr;
   };
 
-  //Get split key and value strings from getKeyValuePairsArr elements using ':' as split point
-  let getKeyValString = (el, isVal) => {
+  //Get split key and value strings from getKeyValuePairs elements using ':' as split point
+  const getKeyValString = function getSplitKeyAndValStrings(el, isVal) {
     let str = '';
     let i = 0;
     while (el[i] != ':') {
@@ -86,7 +86,7 @@ var parseJSON = function(json) {
     return str;
   };
 
-  let getKeyValuePairsArr = (el) => {
+  const getKeyValuePairs = function getKeyValuePairsInArray(el) {
     let arr = [];
     let isInString = false;
     let str = '';
