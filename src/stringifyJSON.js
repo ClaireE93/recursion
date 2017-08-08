@@ -4,8 +4,6 @@
 // but you don't so you're going to write it from scratch:
 
 var stringifyJSON = function(obj) {
-  let arrElements = [];
-  let arrObj = [];
 
   if(typeof obj === 'number' || typeof obj ==='boolean' || obj === null) {
     return '' + obj;
@@ -16,14 +14,16 @@ var stringifyJSON = function(obj) {
   if(typeof obj === 'undefined' || typeof obj === 'function') return null;
 
   if(Array.isArray(obj)) {
-    for(let i = 0; i < obj.length; i++) {
-      arrElements.push(stringifyJSON(obj[i]));
-    }
+    let arrElements = [];
+    obj.forEach((el) => {
+      arrElements.push(stringifyJSON(el));
+    });
 
     return '[' + arrElements.join(',') + ']';
-    }
+  }
 
   if(typeof obj === 'object') {
+    let arrObj = [];
     for(let keys in obj) {
       if(stringifyJSON(obj[keys])) {
         arrObj.push(`"${keys}":${stringifyJSON(obj[keys])}`)
