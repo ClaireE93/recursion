@@ -42,9 +42,7 @@ var parseJSON = function(json) {
 
   //Check for negatives, floats, and ints.
   const isNum = function checkIfElIsNumber(el) {
-    let test = /^[0-9]+$/.test(el[0]) || /^[0-9]+$/.test(el[1]);
-
-    return test;
+    return /^[0-9]+$/.test(el[0]) || /^[0-9]+$/.test(el[1]);
   };
 
   const parseObj = function parseObjUsingRecursion(el) {
